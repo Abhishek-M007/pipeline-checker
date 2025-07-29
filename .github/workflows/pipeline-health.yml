@@ -19,5 +19,14 @@ jobs:
       - name: Build Docker image
         run: docker build -t pipeline-checker .
 
-      - name: Run pipeline health check
-        run: docker run pipeline-checker
+      - name: Run pipeline health check and capture logs
+        run: |
+          docker run --name pipeline-container pipeline-checker > pipeline.log
+          docker cp pipeline-container:/app/pipeline.log ./pipeline.log
+          docker rm pipeline-container
+
+      - name: Upload log file
+        uses: actions/upload-artifact@v3
+        with:
+          name: pipeline-log
+          path: pipeline.log
